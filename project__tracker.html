@@ -129,10 +129,13 @@ html[data-theme-name="ocean"]{--accent:#0288d1;--accent-h:#0277bd;--accent-bg:rg
 html[data-theme-name="forest"]{--accent:#2e7d32;--accent-h:#1b5e20;--accent-bg:rgba(46,125,50,.09);--accent-bg2:rgba(46,125,50,.16);--bg:#e8f5e9;--bg2:#fff;--bg3:#c8e6c9}
 html[data-theme-name="sunset"]{--accent:#e64a19;--accent-h:#bf360c;--accent-bg:rgba(230,74,25,.09);--accent-bg2:rgba(230,74,25,.16);--bg:#fbe9e7;--bg2:#fff;--bg3:#ffccbc}
 html[data-theme-name="midnight"]{--accent:#7c4dff;--accent-h:#651fff;--accent-bg:rgba(124,77,255,.12);--accent-bg2:rgba(124,77,255,.22)}
+html[data-theme-name="crimson"]{--accent:#6e1313;--accent-h:#440000;--accent-bg:rgba(110,19,19,.10);--accent-bg2:rgba(110,19,19,.18);--bg:#fff0f0;--bg2:#ffffff;--bg3:#f4b3b3}
+html[data-theme-name="obsidian"]{--accent:#59001c;--accent-h:#440000;--accent-bg:rgba(89,0,28,.10);--accent-bg2:rgba(89,0,28,.18);--bg:#002028;--bg2:#0d1216;--bg3:#30332f;--t1:#ffe6e6;--t2:#f4b3b3;--t3:#c1c1bd;--t4:#59001c;--card:rgba(13,18,22,.95);--sidebar:rgba(13,18,22,.98);--border:rgba(255,230,230,.08);--border2:rgba(255,230,230,.14)}
 html[data-theme="dark"][data-theme-name="ocean"]{--bg:#0d1b2a;--bg2:#112233;--bg3:#1a2f44}
 html[data-theme="dark"][data-theme-name="forest"]{--bg:#0a1f0a;--bg2:#112211;--bg3:#1a331a}
 html[data-theme="dark"][data-theme-name="sunset"]{--bg:#1f0d0a;--bg2:#2a1208;--bg3:#3a1a10}
 html[data-theme="dark"][data-theme-name="midnight"]{--accent:#9c6fff;--accent-h:#7c4dff}
+html[data-theme="dark"][data-theme-name="crimson"]{--bg:#0f0000;--bg2:#1a0505;--bg3:#2a0a0a;--accent:#f4b3b3;--accent-h:#e88888}
 
 /* KANBAN */
 .kanban-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-items:start}
@@ -262,11 +265,12 @@ th.sort-desc::after{content:' ↓';color:var(--accent)}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700}
 .badge-planning{background:var(--purple-bg);color:var(--purple)}
 .badge-active{background:var(--accent-bg);color:var(--accent)}
+.badge-costing{background:var(--teal-bg);color:var(--teal)}
 .badge-sample{background:var(--orange-bg);color:var(--orange)}
 .badge-pilot{background:var(--yellow-bg);color:#b07800}
 .badge-production{background:var(--green-bg);color:var(--green)}
 .badge-hold{background:var(--red-bg);color:var(--red)}
-.badge-completed{background:var(--teal-bg);color:var(--teal)}
+.badge-completed{background:var(--green-bg);color:var(--green)}
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
 
 /* TABLE */
@@ -556,7 +560,7 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="logo-area">
-    <div class="logo-icon">📐</div>
+    <div class="logo-icon" id="sidebar-logo-icon">📐</div>
     <div class="logo-text">
       <div class="lt1">Project Tracker</div>
       <div class="lt2">Command Centre</div>
@@ -671,11 +675,10 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
           <select class="form-select" id="filter-status" style="font-size:12px;padding:6px 10px" onchange="applyFilters()">
             <option value="">All</option>
             <option value="planning">Planning</option>
-            <option value="active">Active</option>
-            <option value="sample">Sample</option>
-            <option value="pilot">Pilot</option>
-            <option value="production">Production</option>
-            <option value="completed">Completed</option>
+            <option value="active">Active / In Progress</option>
+            <option value="costing">Costing</option>
+            <option value="sample">Sample Release</option>
+            <option value="pilot">Pilot Release / Handover</option>
             <option value="hold">On Hold</option>
           </select>
         </div>
@@ -729,14 +732,13 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
       <!-- BULK ACTION BAR -->
       <div class="bulk-bar" id="bulk-bar">
         <span class="bulk-count" id="bulk-count">0 selected</span>
-        <select class="form-select" id="bulk-status-sel" style="width:180px;font-size:12px;padding:5px 10px">
+        <select class="form-select" id="bulk-status-sel" style="width:200px;font-size:12px;padding:5px 10px">
           <option value="">— Change status to… —</option>
           <option value="planning">Planning</option>
-          <option value="active">Active</option>
+          <option value="active">Active / In Progress</option>
+          <option value="costing">Costing</option>
           <option value="sample">Sample Release</option>
-          <option value="pilot">Pilot Production</option>
-          <option value="production">Production Release</option>
-          <option value="completed">Completed</option>
+          <option value="pilot">Pilot Release / Handover</option>
           <option value="hold">On Hold</option>
         </select>
         <button class="btn btn-primary btn-sm" onclick="applyBulkStatus()">✅ Apply</button>
@@ -747,19 +749,19 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
         <table id="proj-table">
           <thead>
             <tr>
-              <th><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" style="accent-color:var(--accent);cursor:pointer"></th>
-              <th class="sortable" onclick="sortTable('sno')">#</th>
-              <th class="sortable" onclick="sortTable('name')">Project / Product Name</th>
-              <th class="sortable" onclick="sortTable('startDate')">Start Date</th>
-              <th class="sortable" onclick="sortTable('sampleDate')">Sample Release</th>
-              <th class="sortable" onclick="sortTable('pilotDate')">Pilot Production</th>
-              <th class="sortable" onclick="sortTable('targetDate')">🎯 Target Date</th>
-              <th>Days Taken</th>
-              <th>Docs</th>
-              <th>🕐 Last Modified</th>
-              <th class="sortable" onclick="sortTable('progress')">Progress</th>
-              <th class="sortable" onclick="sortTable('status')">Status</th>
-              <th></th>
+              <th data-col="cb"><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" style="accent-color:var(--accent);cursor:pointer"></th>
+              <th data-col="sno" class="sortable" onclick="sortTable('sno')">#</th>
+              <th data-col="name" class="sortable" onclick="sortTable('name')">Project / Product Name</th>
+              <th data-col="startDate" class="sortable" onclick="sortTable('startDate')">Start Date</th>
+              <th data-col="sampleDate" class="sortable" onclick="sortTable('sampleDate')">Sample Release</th>
+              <th data-col="pilotDate" class="sortable" onclick="sortTable('pilotDate')">Pilot Production</th>
+              <th data-col="targetDate" class="sortable" onclick="sortTable('targetDate')">🎯 Target Date</th>
+              <th data-col="days">Days Taken</th>
+              <th data-col="docs">Docs</th>
+              <th data-col="lastmod">🕐 Last Modified</th>
+              <th data-col="progress" class="sortable" onclick="sortTable('progress')">Progress</th>
+              <th data-col="status" class="sortable" onclick="sortTable('status')">Status</th>
+              <th data-col="actions"></th>
             </tr>
           </thead>
           <tbody id="proj-tbody"></tbody>
@@ -789,21 +791,29 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
     <div class="grad-tabs">
       <div class="grad-tab active" onclick="filterStatus('all',this)">All</div>
       <div class="grad-tab" onclick="filterStatus('active',this)">Active</div>
+      <div class="grad-tab" onclick="filterStatus('costing',this)">Costing</div>
       <div class="grad-tab" onclick="filterStatus('sample',this)">Sample</div>
-      <div class="grad-tab" onclick="filterStatus('production',this)">Production</div>
+      <div class="grad-tab" onclick="filterStatus('pilot',this)">Pilot / Done</div>
+      <div class="grad-tab" onclick="filterStatus('hold',this)">On Hold</div>
     </div>
     <div id="projects-grid" class="card" style="padding:0">
+      <div style="padding:12px 16px;border-bottom:.5px solid var(--border);display:flex;align-items:center;gap:10px">
+        <input type="text" class="form-input" style="max-width:240px;padding:6px 12px;font-size:12px" placeholder="🔍 Search projects..." oninput="filterTable2(this.value)">
+      </div>
       <div class="table-wrap" style="border:none;box-shadow:none">
         <table id="proj-table2">
           <thead>
             <tr>
-              <th>S.NO</th>
+              <th><input type="checkbox" id="select-all-cb2" onchange="toggleSelectAll2(this)" style="accent-color:var(--accent);cursor:pointer"></th>
+              <th>#</th>
               <th>Project / Product Name</th>
               <th>Start Date</th>
               <th>Sample Release</th>
               <th>Pilot Production</th>
-              <th>Production Release</th>
+              <th>🎯 Target Date</th>
               <th>Days Taken</th>
+              <th>Docs</th>
+              <th>🕐 Last Modified</th>
               <th>Progress</th>
               <th>Status</th>
               <th></th>
@@ -1192,10 +1202,9 @@ mark{background:var(--yellow-bg);color:var(--t1);border-radius:3px;padding:0 2px
         <select class="form-select" id="f-status">
           <option value="planning">Planning</option>
           <option value="active">Active / In Progress</option>
+          <option value="costing">Costing</option>
           <option value="sample">Sample Release</option>
-          <option value="pilot">Pilot Production</option>
-          <option value="production">Production Release</option>
-          <option value="completed">Completed</option>
+          <option value="pilot">Pilot Release / Handover</option>
           <option value="hold">On Hold</option>
         </select>
       </div>
@@ -1559,22 +1568,26 @@ let currentProductId = null;
 let previousPage = 'dashboard';
 
 const STATUS_MAP = {
-  planning: {label:'Planning', cls:'badge-planning'},
-  active: {label:'Active', cls:'badge-active'},
-  sample: {label:'Sample Release', cls:'badge-sample'},
-  pilot: {label:'Pilot Production', cls:'badge-pilot'},
-  production: {label:'Production Release', cls:'badge-production'},
-  completed: {label:'Completed', cls:'badge-completed'},
-  hold: {label:'On Hold', cls:'badge-hold'}
+  planning:  {label:'Planning',              cls:'badge-planning'},
+  active:    {label:'Active / In Progress',  cls:'badge-active'},
+  costing:   {label:'Costing',               cls:'badge-costing'},
+  sample:    {label:'Sample Release',        cls:'badge-sample'},
+  pilot:     {label:'Pilot Release / Handover', cls:'badge-completed'},
+  hold:      {label:'On Hold',               cls:'badge-hold'},
+  // Legacy keys kept for backward compatibility
+  production:{label:'Pilot Release / Handover', cls:'badge-completed'},
+  completed: {label:'Pilot Release / Handover', cls:'badge-completed'}
 };
 
 const STATUS_PROGRESS = {
-  planning:10, active:30, sample:50, pilot:70, production:90, completed:100, hold:20
+  planning:5, active:20, costing:35, sample:60, pilot:100, hold:10,
+  production:100, completed:100
 };
 
 const STATUS_COLOR = {
-  planning:'var(--purple)',active:'var(--accent)',sample:'var(--orange)',
-  pilot:'var(--yellow)',production:'var(--green)',completed:'var(--teal)',hold:'var(--red)'
+  planning:'var(--purple)', active:'var(--accent)', costing:'var(--teal)',
+  sample:'var(--orange)', pilot:'var(--green)', hold:'var(--red)',
+  production:'var(--green)', completed:'var(--green)'
 };
 
 const DOC_SAMPLE = ['Cutlist','HW List','Furniture BOM','Assembly DRG','Plot Label','Signoff'];
@@ -1688,7 +1701,7 @@ function renderDash(){
   document.getElementById('stat-total').textContent = projects.length;
   document.getElementById('stat-active').textContent = projects.filter(p=>p.status==='active').length;
   document.getElementById('stat-sample').textContent = projects.filter(p=>p.status==='sample').length;
-  document.getElementById('stat-prod').textContent = projects.filter(p=>['production','completed'].includes(p.status)).length;
+  document.getElementById('stat-prod').textContent = projects.filter(p=>['pilot','production','completed'].includes(p.status)).length;
   const strip = document.getElementById('overview-strip');
   const colors = ['#1a73e8','#0f9d58','#f4511e','#673ab7','#00bcd4','#f9ab00','#e91e63'];
   strip.innerHTML = projects.map((p,i)=>`<div class="overview-chip" onclick="openProductPage('${p.id}')"><div class="chip-dot" style="background:${colors[i%colors.length]}"></div>${p.name}<span style="color:var(--t4);font-size:10px;font-weight:600">${(STATUS_MAP[p.status]&&STATUS_MAP[p.status].label)||p.status}</span></div>`).join('');
@@ -1708,9 +1721,9 @@ function renderDash(){
 
 function renderNotifications(){
   const today = new Date(); today.setHours(0,0,0,0);
-  const overdue = projects.filter(p=>p.targetDate&&p.status!=='completed'&&new Date(p.targetDate)<today);
+  const overdue = projects.filter(p=>p.targetDate&&p.status!=='pilot'&&p.status!=='production'&&p.status!=='completed'&&new Date(p.targetDate)<today);
   const dueSoon = projects.filter(p=>{
-    if(!p.targetDate||p.status==='completed') return false;
+    if(!p.targetDate||p.status==='pilot'||p.status==='production'||p.status==='completed') return false;
     const d=new Date(p.targetDate);d.setHours(0,0,0,0);
     const dl=Math.round((d-today)/(1000*60*60*24));
     return dl>=0&&dl<=7;
@@ -1783,7 +1796,7 @@ function renderProjTable(tbodyId, emptyId, statusFilter){
     let targetCell = '<span class="date-cell na">—</span>';
     if(p.targetDate){
       const td = new Date(p.targetDate); td.setHours(0,0,0,0);
-      const isOverdue = td < today && p.status !== 'completed';
+      const isOverdue = td < today && p.status !== 'pilot' && p.status !== 'production' && p.status !== 'completed';
       const daysLeft = Math.round((td - today)/(1000*60*60*24));
       targetCell = `<div style="display:flex;flex-direction:column;gap:2px">
         <span class="date-cell" style="${isOverdue?'color:var(--red);font-weight:700':''}">${fmtDate(p.targetDate)}</span>
@@ -1822,7 +1835,7 @@ function renderProjTable(tbodyId, emptyId, statusFilter){
       <td ${hide('targetDate')}>${targetCell}</td>
       <td ${hide('days')}><span class="days-badge">⏱ ${days}d</span></td>
       <td ${hide('docs')}>${docCell}</td>
-      <td>${renderLatestModCell(p)}</td>
+      <td ${hide('lastmod')}>${renderLatestModCell(p)}</td>
       <td ${hide('progress')}><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${pgColor}"></div></div><span class="prog-pct">${pct}%</span></div></td>
       <td ${hide('status')}><span class="badge ${s.cls}">${s.label}</span>${autoSt}</td>
       <td ${hide('actions')}><div class="table-action-btns"><div class="tbl-btn" onclick="editProject('${p.id}')" title="Edit">✏️</div><div class="tbl-btn" onclick="duplicateProject('${p.id}')" title="Duplicate">📋</div><div class="tbl-btn" onclick="saveAsTemplate('${p.id}')" title="Save as template">📑</div><div class="tbl-btn danger" onclick="deleteProject('${p.id}')" title="Delete">🗑</div></div></td>
@@ -1841,6 +1854,16 @@ function filterStatus(f, el){
 function filterTable(q){
   const rows = document.querySelectorAll('#proj-tbody tr');
   rows.forEach(r=>{r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+}
+
+function filterTable2(q){
+  const rows = document.querySelectorAll('#proj-tbody2 tr');
+  rows.forEach(r=>{r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+}
+
+function toggleSelectAll2(cb){
+  document.querySelectorAll('#proj-tbody2 .proj-cb').forEach(c=>c.checked=cb.checked);
+  updateBulkBar();
 }
 
 // ==================== ADD / EDIT PROJECT ====================
@@ -2684,7 +2707,7 @@ function renderMonthlySummary(){
   const piloted   = projects.filter(p=>inMonth(p.pilotDate));
   const released  = projects.filter(p=>inMonth(p.prodDate));
   const targeted  = projects.filter(p=>inMonth(p.targetDate));
-  const overdueNow= projects.filter(p=>p.targetDate&&p.status!=='completed'&&new Date(p.targetDate)<new Date());
+  const overdueNow= projects.filter(p=>p.targetDate&&p.status!=='pilot'&&p.status!=='production'&&p.status!=='completed'&&new Date(p.targetDate)<new Date());
 
   const body = document.getElementById('monthly-body');
   body.innerHTML=`
@@ -2807,8 +2830,8 @@ let activeFilters = {};
 let undoStack = [];
 let recentlyViewed = JSON.parse(localStorage.getItem('pt_recent')||'[]');
 
-const ALL_COLS = ['cb','sno','name','startDate','sampleDate','pilotDate','targetDate','days','docs','progress','status','actions'];
-const COL_LABELS = {cb:'☑',sno:'#',name:'Project Name',startDate:'Start Date',sampleDate:'Sample Release',pilotDate:'Pilot Production',targetDate:'Target Date',days:'Days',docs:'Docs',progress:'Progress',status:'Status',actions:'Actions'};
+const ALL_COLS = ['cb','sno','name','startDate','sampleDate','pilotDate','targetDate','days','docs','lastmod','progress','status','actions'];
+const COL_LABELS = {cb:'☑',sno:'#',name:'Project Name',startDate:'Start Date',sampleDate:'Sample Release',pilotDate:'Pilot Production',targetDate:'Target Date',days:'Days',docs:'Docs',lastmod:'Last Modified',progress:'Progress',status:'Status',actions:'Actions'};
 
 function setView(view, btn){
   currentView = view;
@@ -2835,15 +2858,19 @@ function toggleColumnPanel(){
 function renderColumnToggles(){
   const wrap = document.getElementById('col-toggles');
   if(!wrap) return;
-  wrap.innerHTML = ALL_COLS.filter(c=>c!=='cb'&&c!=='actions').map(c=>`
-    <div class="col-toggle ${hiddenCols.has(c)?'':'on'}" onclick="toggleCol('${c}',this)">${COL_LABELS[c]||c}</div>
-  `).join('');
+  wrap.innerHTML = ALL_COLS.filter(c=>c!=='cb'&&c!=='actions').map(c=>
+    '<div class="col-toggle '+(hiddenCols.has(c)?'':'on')+'" onclick="toggleCol(\''+c+'\',this)">'+( COL_LABELS[c]||c)+'</div>'
+  ).join('');
 }
 
 function toggleCol(col, el){
   if(hiddenCols.has(col)) hiddenCols.delete(col);
   else hiddenCols.add(col);
   el.classList.toggle('on');
+  // Hide/show the <th> header as well as <td> cells
+  document.querySelectorAll('#proj-table th[data-col="'+col+'"]').forEach(function(th){
+    th.style.display = hiddenCols.has(col) ? 'none' : '';
+  });
   renderProjTable('proj-tbody','table-empty',null);
 }
 
@@ -2892,7 +2919,7 @@ function sortTable(col){
 
 // ==================== KANBAN VIEW ====================
 function renderKanban(){
-  const statuses = ['planning','active','sample','pilot','production','completed','hold'];
+  const statuses = ['planning','active','costing','sample','pilot','hold'];
   const colors = {planning:'var(--purple)',active:'var(--accent)',sample:'var(--orange)',pilot:'var(--yellow)',production:'var(--green)',completed:'var(--teal)',hold:'var(--red)'};
   const body = document.getElementById('proj-tbody');
   const emptyEl = document.getElementById('table-empty');
@@ -3100,14 +3127,14 @@ function autoUpdateStatuses(){
   const today = new Date(); today.setHours(0,0,0,0);
   let changed = 0;
   projects.forEach(p=>{
-    if(p.status==='completed') return;
+    if(p.status==='pilot'||p.status==='production'||p.status==='completed') return;
     const old = p.status;
-    if(p.prodDate && new Date(p.prodDate) <= today && p.status!=='completed'){p.status='completed';changed++;}
-    else if(p.pilotDate && new Date(p.pilotDate) <= today && ['planning','active','sample'].includes(p.status)){p.status='pilot';changed++;}
-    else if(p.sampleDate && new Date(p.sampleDate) <= today && ['planning','active'].includes(p.status)){p.status='sample';changed++;}
-    if(old!==p.status) addLog(p.id,`Auto-status updated: "${(STATUS_MAP[old]&&STATUS_MAP[old].label)||old}" → "${(STATUS_MAP[p.status]&&STATUS_MAP[p.status].label)||p.status}"`);
+    if(p.sampleDate && new Date(p.sampleDate)<=today && (p.status==='planning'||p.status==='active'||p.status==='costing')){
+      p.status='sample'; changed++;
+    }
+    if(old!==p.status) addLog(p.id,'Auto-status: "'+(STATUS_MAP[old]&&STATUS_MAP[old].label||old)+'" → "'+(STATUS_MAP[p.status]&&STATUS_MAP[p.status].label||p.status)+'"');
   });
-  if(changed){save();toast(`⚡ ${changed} project${changed>1?'s':''} auto-updated`);}
+  if(changed){save();toast('⚡ '+changed+' project'+(changed>1?'s':'')+' auto-updated');}
 }
 
 // ==================== OFFLINE DETECTION ====================
@@ -3141,9 +3168,9 @@ async function setupPushNotifications(){
 
 function checkDueTodayNotification(){
   const today = new Date(); today.setHours(0,0,0,0);
-  const overdue = projects.filter(p=>p.targetDate&&p.status!=='completed'&&new Date(p.targetDate)<today);
+  const overdue = projects.filter(p=>p.targetDate&&p.status!=='pilot'&&p.status!=='production'&&p.status!=='completed'&&new Date(p.targetDate)<today);
   const dueToday = projects.filter(p=>{
-    if(!p.targetDate||p.status==='completed') return false;
+    if(!p.targetDate||p.status==='pilot'||p.status==='production'||p.status==='completed') return false;
     const d=new Date(p.targetDate);d.setHours(0,0,0,0);
     return d.getTime()===today.getTime();
   });
@@ -3157,11 +3184,13 @@ function checkDueTodayNotification(){
 
 // ==================== EXTENDED THEMES ====================
 const THEMES = [
-  {name:'default', label:'Default Blue', color:'#1a73e8', preview:'linear-gradient(135deg,#1a73e8,#673ab7)'},
-  {name:'ocean',   label:'Ocean',        color:'#0288d1', preview:'linear-gradient(135deg,#0288d1,#00bcd4)'},
-  {name:'forest',  label:'Forest',       color:'#2e7d32', preview:'linear-gradient(135deg,#2e7d32,#8bc34a)'},
-  {name:'sunset',  label:'Sunset',       color:'#e64a19', preview:'linear-gradient(135deg,#e64a19,#f9ab00)'},
-  {name:'midnight',label:'Midnight',     color:'#7c4dff', preview:'linear-gradient(135deg,#7c4dff,#e91e63)'},
+  {name:'default', label:'Default Blue',   color:'#1a73e8', preview:'linear-gradient(135deg,#1a73e8,#673ab7)'},
+  {name:'ocean',   label:'Ocean',          color:'#0288d1', preview:'linear-gradient(135deg,#0288d1,#00bcd4)'},
+  {name:'forest',  label:'Forest',         color:'#2e7d32', preview:'linear-gradient(135deg,#2e7d32,#8bc34a)'},
+  {name:'sunset',  label:'Sunset',         color:'#e64a19', preview:'linear-gradient(135deg,#e64a19,#f9ab00)'},
+  {name:'midnight',label:'Midnight',       color:'#7c4dff', preview:'linear-gradient(135deg,#7c4dff,#e91e63)'},
+  {name:'crimson', label:'Crimson',        color:'#6e1313', preview:'linear-gradient(135deg,#440000,#6e1313,#f4b3b3)'},
+  {name:'obsidian',label:'Obsidian Ruby',  color:'#59001c', preview:'linear-gradient(135deg,#0d1216,#30332f,#59001c)'},
 ];
 
 function setThemeName(name){
@@ -4345,30 +4374,42 @@ function loadFavImage(input){
 function applyFavicon(){
   const dataUrl = buildFaviconDataUrl();
   if(!dataUrl){ toast('⚠ Could not generate icon'); return; }
-  // Update the favicon link tag
-  let link = document.querySelector("link[rel='icon']");
+  // Update browser tab favicon
+  var link = document.querySelector("link[rel='icon']");
   if(!link){ link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
   link.href = dataUrl;
-  // Update apple touch icon
-  let alink = document.querySelector("link[rel='apple-touch-icon']");
+  var alink = document.querySelector("link[rel='apple-touch-icon']");
   if(!alink){ alink = document.createElement('link'); alink.rel = 'apple-touch-icon'; document.head.appendChild(alink); }
   alink.href = dataUrl;
-  // Save to localStorage so it persists
+  // Update sidebar logo icon to match
+  updateSidebarLogo(dataUrl);
+  // Save to localStorage
   localStorage.setItem('pt_favicon', dataUrl);
   localStorage.setItem('pt_favicon_type', currentFavTab);
-  // Update the small preview button
-  const prev = document.getElementById('current-favicon-preview');
+  // Update small preview button
+  var prev = document.getElementById('current-favicon-preview');
   if(prev){ prev.innerHTML = '<img src="'+dataUrl+'" style="width:16px;height:16px;border-radius:3px;vertical-align:middle">'; }
   closeModal('modal-favicon');
   toast('✅ Tab icon updated!');
 }
 
+function updateSidebarLogo(dataUrl){
+  var logoEl = document.getElementById('sidebar-logo-icon');
+  if(!logoEl) return;
+  if(dataUrl){
+    logoEl.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;border-radius:10px;object-fit:cover">';
+  } else {
+    logoEl.innerHTML = '📐';
+  }
+}
+
 function resetFavicon(){
   localStorage.removeItem('pt_favicon');
   localStorage.removeItem('pt_favicon_type');
-  let link = document.querySelector("link[rel='icon']");
+  var link = document.querySelector("link[rel='icon']");
   if(link) link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a73e8'/><text y='72' x='50' text-anchor='middle' font-size='65'>📐</text></svg>";
-  const prev = document.getElementById('current-favicon-preview');
+  updateSidebarLogo(null);
+  var prev = document.getElementById('current-favicon-preview');
   if(prev) prev.textContent = '📐';
   closeModal('modal-favicon');
   toast('↩ Tab icon reset to default');
@@ -4377,10 +4418,11 @@ function resetFavicon(){
 function restoreFavicon(){
   const saved = localStorage.getItem('pt_favicon');
   if(!saved) return;
-  let link = document.querySelector("link[rel='icon']");
+  var link = document.querySelector("link[rel='icon']");
   if(!link){ link = document.createElement('link'); link.rel='icon'; document.head.appendChild(link); }
   link.href = saved;
-  const prev = document.getElementById('current-favicon-preview');
+  updateSidebarLogo(saved);
+  var prev = document.getElementById('current-favicon-preview');
   if(prev){ prev.innerHTML = '<img src="'+saved+'" style="width:16px;height:16px;border-radius:3px;vertical-align:middle">'; }
 }
 
